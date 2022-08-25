@@ -362,7 +362,10 @@ impl Connection for TcpStream {
     fn connected(&self) -> Connected {
         let connected = Connected::new();
         if let (Ok(remote_addr), Ok(local_addr)) = (self.peer_addr(), self.local_addr()) {
-            connected.extra(HttpInfo { remote_addr, local_addr })
+            connected.extra(HttpInfo {
+                remote_addr,
+                local_addr,
+            })
         } else {
             connected
         }
@@ -596,6 +599,12 @@ fn connect(
     use socket2::{Domain, Protocol, Socket, TcpKeepalive, Type};
     use std::convert::TryInto;
 
+    let socket = if cfg!(madsim) {
+        TcpSocket::new_v4().map_err(ConnectError::m("simulated tcp connect error"))?
+    } else {
+    // Note: no indentation for better merges from upstream
+
+
     let domain = Domain::for_address(*addr);
     let socket = Socket::new(domain, Type::STREAM, Some(Protocol::TCP))
         .map_err(ConnectError::m("tcp open error"))?;
@@ -638,6 +647,10 @@ fn connect(
         // it, so this is safe.
         use std::os::windows::io::{FromRawSocket, IntoRawSocket};
         TcpSocket::from_raw_socket(socket.into_raw_socket())
+    };
+
+
+    socket
     };
 
     if config.reuse_address {
