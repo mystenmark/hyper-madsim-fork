@@ -599,7 +599,7 @@ fn connect(
     use socket2::{Domain, Protocol, Socket, TcpKeepalive, Type};
     use std::convert::TryInto;
 
-    let socket = if cfg!(madsim) {
+    let socket = if cfg!(msim) {
         TcpSocket::new_v4().map_err(ConnectError::m("simulated tcp connect error"))?
     } else {
     // Note: no indentation for better merges from upstream
